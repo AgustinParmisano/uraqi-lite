@@ -44,17 +44,21 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             info = {}
             try:
                 text = ser.readline() # Read the newest output from the Arduino
-                #print(text)
+                print("TEXT: ")
+                print(text)
                 values = str(text).split(".")
                 info = {
-                    "humedad"  : float(values[1]),
-                    "temperatura"   : float(values[2]),
+                    "luz"      : float(values[1]),
+                    "humedad"  : float(values[2]),
+                    "temperatura"   : float(values[3]),
                     "tierra" : float(values[0]),
                     "estado"    : int(values[3]),
                     "timestamp" : time.time()
                 }
                 print info
             except Exception as e:
+                print("EXCEPTION: ")
+                print(e)
                 #print(info)
                 info = {
                     "humedad"  : float("0.0"),
@@ -69,6 +73,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         except Exception as e:
             print ("restartplease")
             self.write_message("restartplease")
+            print e
             #raise(e)
         else:
             tornado.ioloop.IOLoop.instance().add_timeout(timedelta(seconds=0.1), self.test)

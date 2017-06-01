@@ -1,9 +1,9 @@
 #include <DHT.h>
 
-#define DHTPIN 7
 #define DHTTYPE DHT11
-#define tierra A5
-#define luz A0
+#define DHTPIN 7
+#define tierra A0
+#define luz A1
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -16,10 +16,14 @@ void loop() {
   float h = dht.readHumidity();
   float t = dht.readTemperature();
   float m = analogRead(tierra);
+  float l = analogRead(luz);
 
   delay(1000);
+  
   //Serial.print("Tierra: ");
   Serial.print(m);
+  //Serial.print("Luz: ");
+  Serial.print(l);
   if (isnan(t) || isnan(h) ) {
     Serial.println("00 ");
   } else {
