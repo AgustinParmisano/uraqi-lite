@@ -133,7 +133,7 @@
       hume = json.humedad;
       temp = json.temperatura;
       console.log("Luz_RAW: " + json.luz);
-      luz = 100 - json.luz / 2;
+      luz = json.luz;  //100 - json.luz / 2;
       console.log("Luz: " + luz);
       tierra = 100 - (json.tierra / 10.22);
       state = json.estado;

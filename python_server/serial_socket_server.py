@@ -25,7 +25,7 @@ if arduino_port == "":
     sys.exit("where is it?")
 
 # Establish the connection on a specific port
-ser = serial.Serial(arduino_port, 9600)
+ser = serial.Serial(arduino_port, 115200) #9600)
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     tt = datetime.datetime.now()
@@ -47,17 +47,27 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                 print("TEXT: ")
                 print(text)
                 values = str(text).split(".")
-                info = {
+                """
+		info = {
                     "luz"      : float(values[1]),
                     "humedad"  : float(values[2]),
                     "temperatura"   : float(values[3]),
                     "tierra" : float(values[0]),
                     "estado"    : int(values[3]),
                     "timestamp" : time.time()
+		}
+		"""
+                info = {
+                    "luz"      : float(values[0]), 
+                    "humedad"  : float(values[1]), 
+                    "temperatura"   : float(values[2]), 
+                    #"tierra" : float(values[0]), 
+                    "estado"    : int(values[3]),
+                    "timestamp" : time.time()
                 }
                 print info
             except Exception as e:
-                print("EXCEPTION: ")
+                print("EXCEPTION IN TEST READ FROM READ SERIAL: ")
                 print(e)
                 #print(info)
                 info = {
