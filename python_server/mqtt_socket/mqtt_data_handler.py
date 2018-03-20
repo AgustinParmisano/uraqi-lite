@@ -4,11 +4,13 @@ import tornado
 import tornado.websocket
 import time
 import datetime
+from datetime import timedelta
 import json
 import ast
 import Queue
 
 qmsg = Queue.Queue()
+clients = []
 
 class WebSocketHandler(tornado.websocket.WebSocketHandler):
     tt = datetime.datetime.now()
@@ -18,59 +20,36 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     # the client connected
     def open(self):
         print ("New client connected")
-        self.write_message("You are connected")
         clients.append(self)
         tornado.ioloop.IOLoop.instance().add_timeout(timedelta(seconds=1), self.test)
 
     def test(self):
         try:
-            info = {}
+            message = str(qmsg.get())
+            message = ast.literal_eval(json.dumps(message))
+            message = ast.literal_eval(message)
+
             try:
-                text = qmsg.get()
-                print("TEXT: ")
-                print(text)
-                values = str(text).split(".")
-                """
-		info = {
-                    "luz"      : float(values[1]),
-                    "humedad"  : float(values[2]),
-                    "temperatura"   : float(values[3]),
-                    "tierra" : float(values[0]),
-                    "estado"    : int(values[3]),
-                    "timestamp" : time.time()
-		}
-		"""
-                info = {
-                    "luz"      : float(values[0]), 
-                    "humedad"  : float(values[1]), 
-                    "temperatura"   : float(values[2]), 
-                    #"tierra" : float(values[0]), 
-                    "estado"    : int(values[3]),
-                    "timestamp" : time.time()
-                }
-                print info
+                time.sleep(1)
+                self.write_message(message)
             except Exception as e:
-                print("EXCEPTION IN TEST READ FROM READ SERIAL: ")
-                print(e)
-                #print(info)
-                info = {
-                    "humedad"  : float("0.0"),
-                    "temperatura"   : float("0.0"),
-                    "tierra" : float("0.0"),
-                    "estado"    : -1,
-                    "timestamp" : time.time()
-                }
-                #raise(e)
-            print(info)
-            self.write_message(info)
+                print "Exception in test write message: "
+                print e
+                raise(e)
         except Exception as e:
-            print ("restartplease")
-            self.write_message("restartplease")
+            print "Exception in test write message 2: "
             print e
-            #raise(e)
+            raise(e)
         else:
             tornado.ioloop.IOLoop.instance().add_timeout(timedelta(seconds=0.1), self.test)
 
+    def on_message(self, message):
+        try:
+           msg = json.loads(message.payload)
+           data_json = {}
+        except Exception as e:
+          print "Exception in websocket class on_message: "
+          print e
 
 def msg_ws(msg):
    resp = publish.single("data_to_web", msg, hostname="localhost")
@@ -90,15 +69,9 @@ data_list = []
 
 def on_message(client, userdata, msg):
    print("msg.topic: " + msg.topic+" msg.payload "+str(msg.payload))
-   list = json.loads(msg.payload)
-   data_json = {}
-   for key,value in list.iteritems():
-       data_json[key] = value
-       print ("")
-       print key, value
-       print "data_json"
-       print data_json
-       qmsg.put(data_json)
+   payload = str(msg.payload)
+   data_dict = ast.literal_eval(payload)
+   qmsg.put(data_dict)
 
 def on_subscribe(client, userdata,mid, granted_qos):
    print "userdata : " +str(userdata)
@@ -134,7 +107,9 @@ socket = tornado.web.Application([(r"/websocket", WebSocketHandler),])
 if __name__ == "__main__":
     print "Starting MQTT"
     mqtt = MqttClient()
-    mqtt.client.loop_forever()
+    mqtt.client.loop_start()
     socket = tornado.web.Application([(r"/websocket", WebSocketHandler),])
     print("Opening port 8888")
     socket.listen(8888)
+    tornado.ioloop.IOLoop.instance().start()
+tornado.ioloop.IOLoop.instance().start()

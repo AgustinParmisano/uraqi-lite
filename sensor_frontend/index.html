@@ -116,7 +116,8 @@
 
     //Web Socket comunication
     //Connect to server
-    var ws = new WebSocket("ws://localhost:8888/websocket");
+    //var ws = new WebSocket("ws://localhost:8888/websocket");
+		var ws = new WebSocket("ws://192.168.0.3:8888/websocket");
     //console.log(ws);
 
     //Open the socket and say hi
@@ -127,40 +128,19 @@
     //Receive message form server
     ws.onmessage = function (evt) {
       json = JSON.parse(evt.data);
-      //console.log(json);
-
-      //set the variables of the object to global variables
-      hume = json.humedad;
-      temp = json.temperatura;
-      console.log("Luz_RAW: " + json.luz);
-      luz = json.luz;  //100 - json.luz / 2;
-      console.log("Luz: " + luz);
-      tierra = 100 - (json.tierra / 10.22);
-      state = json.estado;
-      timestamp = json.timestamp;
-
-
-      var date = new Date(timestamp*1000);
-      // Hours part from the timestamp
-      var hours = date.getHours();
-      // Minutes part from the timestamp
-      var minutes = date.getMinutes();
-      // Seconds part from the timestamp
-      var seconds = date.getSeconds();
-      // Format Time
-      time=hours + ":" + minutes + ":" + seconds;
-
+      console.log(json);
+			luz = json['luz	']
     };
 
 
     $(function () {
         $(document).ready(function () {
-            
+
             Highcharts.setOptions({
                 global: {
                     useUTC: false
                 }
-            
+
             });
 
             $('#luz_chart').highcharts({
